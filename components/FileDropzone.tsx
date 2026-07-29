@@ -3,11 +3,16 @@
 import { useCallback, useState } from "react";
 import { useDropzone, type FileRejection } from "react-dropzone";
 
+// Browsers can hang or crash a tab parsing/rendering extremely large files
+// client-side; reject before that happens instead of letting the tab freeze.
+const DEFAULT_MAX_SIZE_BYTES = 150 * 1024 * 1024;
+
 type Props = {
   onFiles: (files: File[]) => void;
   multiple?: boolean;
   accept?: Record<string, string[]>;
   label?: string;
+  maxSizeBytes?: number;
 };
 
 export default function FileDropzone({
@@ -15,6 +20,7 @@ export default function FileDropzone({
   multiple = false,
   accept = { "application/pdf": [".pdf"] },
   label = "Drag & drop a PDF here, or click to choose",
+  maxSizeBytes = DEFAULT_MAX_SIZE_BYTES,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +36,7 @@ export default function FileDropzone({
     onDrop,
     multiple,
     accept,
+    maxSize: maxSizeBytes,
   });
 
   return (

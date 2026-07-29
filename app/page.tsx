@@ -12,6 +12,11 @@ const TOOLS = [
     description: "Pull out a page range, or break a PDF into individual pages.",
   },
   {
+    href: "/rotate",
+    title: "Rotate PDF",
+    description: "Rotate every page by 90, 180, or 270 degrees.",
+  },
+  {
     href: "/watermark",
     title: "Watermark PDF",
     description: "Stamp text like \"DRAFT\" or your name across every page.",
@@ -20,6 +25,16 @@ const TOOLS = [
     href: "/compress",
     title: "Compress PDF",
     description: "Shrink file size — great for scanned or image-heavy PDFs.",
+  },
+  {
+    href: "/pdf-to-jpg",
+    title: "PDF to JPG",
+    description: "Export every page as a JPG image, zipped if there's more than one.",
+  },
+  {
+    href: "/images-to-pdf",
+    title: "Images to PDF",
+    description: "Combine JPG or PNG images into a single PDF.",
   },
 ];
 
@@ -31,13 +46,13 @@ export default function Home() {
           PDF tools that never see your files
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-          Merge, split, watermark, and compress PDFs entirely in your browser.
-          Nothing is uploaded to a server — your documents never leave your
-          device. Free, no sign-up.
+          Merge, split, rotate, watermark, compress, and convert PDFs
+          entirely in your browser. Nothing is uploaded to a server — your
+          documents never leave your device. Free, no sign-up.
         </p>
       </div>
 
-      <div className="mt-14 grid gap-6 sm:grid-cols-2">
+      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {TOOLS.map((tool) => (
           <Link
             key={tool.href}
