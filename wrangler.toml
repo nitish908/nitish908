@@ -4,8 +4,12 @@
 # live docs (they returned 403s to automated fetches at the time this was
 # written) -- confirm against `wrangler docs` / the current containers
 # starter template before deploying with real trading credentials.
+#
+# `name` must match the Worker project name Cloudflare's git integration
+# (Workers Builds) expects for this connected repo -- it will otherwise
+# override it at deploy time and open a PR to reconcile this file.
 
-name = "trading-agent"
+name = "nitish908"
 main = "cloudflare/worker/src/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]

@@ -169,25 +169,37 @@ survive the container going to sleep and waking back up.
 ```
 Dockerfile                      # packages the app to run trading_agent.server
 wrangler.toml                   # container + Durable Object + Worker config
-cloudflare/worker/
-  src/index.ts                  # Container subclass: schedule()'s /step every N seconds
-  package.json / tsconfig.json
+package.json / tsconfig.json    # at repo root -- see note below on why
+cloudflare/worker/src/index.ts  # Container subclass: schedule()'s /step every N seconds
 ```
+
+**Note on `package.json`'s location:** it lives at the repo root, not next to
+`index.ts`, because Cloudflare's git-integrated deploys (Workers Builds) run
+`npm install` from wherever it auto-detects a `package.json` at the repo
+root, then run `wrangler deploy` from that same root. A `package.json`
+nested under `cloudflare/worker/` is never installed by that flow, which
+causes `wrangler deploy` to fail bundling with `Could not resolve
+"@cloudflare/containers"` (this happened on a real deploy attempt and is why
+the layout is what it is now).
 
 **⚠️ Verification status:** this was built and type-checked in a sandboxed
 session where Cloudflare's docs site returned 403s to automated fetches, and
 Docker Hub image pulls were blocked by the sandbox's own egress policy — so
-it could not be built into an image or deployed to a real Cloudflare account
-here. What *was* verified in this session:
+it could not be built into an image here. It *was*, however, exercised
+against a real Cloudflare Workers Builds deploy (git-integrated, triggered
+from the Cloudflare dashboard), which surfaced and let us fix two real
+issues: the `name` in `wrangler.toml` must match the Worker name Cloudflare's
+build expects for the connected project, and the `package.json` location
+described above. After both fixes, a local `wrangler deploy --dry-run` gets
+past config parsing and JS bundling cleanly, failing only on the same
+sandbox-only Docker Hub block (Cloudflare's own build servers have normal
+registry access, so this shouldn't reproduce there). Additionally verified
+in this session:
 - The full pytest suite, including the state-serialization round-trip proof.
 - `src/trading_agent/server.py` running directly and answering `GET
   /health` / `POST /step` correctly.
-- `cloudflare/worker/src/index.ts` type-checks cleanly against the real
-  `@cloudflare/containers` type declarations (`npx tsc --noEmit`).
-- `wrangler deploy --dry-run` parses `wrangler.toml` without errors (it
-  actually caught and helped fix a deprecated config field: `[[containers]]`
-  fields must be flattened at the top level, not nested under
-  `[containers.configuration]`, in the currently installed wrangler version).
+- `index.ts` type-checks cleanly against the real `@cloudflare/containers`
+  type declarations (`npx tsc --noEmit`).
 
 What was **not** verified (confirm yourself before trusting this with real
 funds): whether `this.schedule()` re-fires cleanly across container
@@ -199,29 +211,33 @@ doubled-up `/step` calls before pointing this at anything real.
 ### Deploy steps
 
 ```bash
-cd cloudflare/worker
-npm install
+npm install                                # from the repo root
 
-npx wrangler login                       # one-time, opens a browser
+npx wrangler login                         # one-time, opens a browser
 
 # Secrets (never commit these; leave unset to run on the offline SimulatedAdapter)
-npx wrangler secret put BINANCE_API_KEY --config ../../wrangler.toml
-npx wrangler secret put BINANCE_API_SECRET --config ../../wrangler.toml
+npx wrangler secret put BINANCE_API_KEY
+npx wrangler secret put BINANCE_API_SECRET
 # ...and/or ALPACA_API_KEY / ALPACA_API_SECRET for stocks
 
-npx wrangler deploy --config ../../wrangler.toml
+npx wrangler deploy
 ```
 
+Or connect the repo to Cloudflare's dashboard (Workers Builds) for
+git-integrated deploys on every push — it auto-runs `npm install` +
+`wrangler deploy` from the repo root the same way.
+
 Start in paper mode (`config/config.yaml` already defaults to it) and watch
-`npx wrangler tail --config ../../wrangler.toml` for the first several polls
-before ever flipping to live mode.
+`npx wrangler tail` for the first several polls before ever flipping to live
+mode.
 
 ## Project layout
 
 ```
 Dockerfile                      # container image for src/trading_agent/server.py
 wrangler.toml                   # Cloudflare Containers/Worker deployment config
-cloudflare/worker/               # Worker + Durable Object driving the container
+package.json / tsconfig.json     # Node project for the Worker (must stay at repo root)
+cloudflare/worker/src/index.ts   # Worker + Durable Object driving the container
 config/config.yaml            # default configuration
 data/fixtures/sample_ohlcv.csv  # synthetic OHLCV data for backtest/tests
 src/trading_agent/
