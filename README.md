@@ -23,8 +23,9 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Notes
 
-- `public/pdf.worker.min.mjs` is the `pdfjs-dist` worker, committed so the
-  app is self-hosted with no CDN dependency. If `pdfjs-dist` is upgraded,
-  regenerate it from `node_modules/pdfjs-dist/build/pdf.worker.min.mjs`.
+- The `pdfjs-dist` worker (used by the Compress tool) is loaded from a CDN
+  (jsdelivr) pinned to the installed `pdfjs-dist` version, keeping the repo
+  free of a large committed binary. It only fetches the library — no PDF
+  content is ever sent anywhere.
 - No backend, no database, no auth in this version — monetization
   (Stripe) is intentionally deferred until there's usage signal.
