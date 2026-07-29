@@ -242,16 +242,31 @@ the disclaimer in the dashboard itself). It bundles its own trimmed copy of
 fixture data (`web/data/sample_ohlcv.csv`) so it never needs to reach
 outside its own directory.
 
-**This matters because of how Vercel's project settings work:** if you
-connect this whole repo to a Vercel project, you *must* set that project's
-**Root Directory to `web`** (Project Settings → General → Root Directory).
-Without it, Vercel scans the repo root, doesn't find `api/*.py` in the
-default location it expects, and fails with "No python entrypoint found in
-default locations" (this happened on a real deploy attempt while building
-this). Once Root Directory is set to `web`, Vercel treats it as the project
-root, finds `index.html` and `api/*.py` where it expects them, and installs
-`web/requirements.txt` (pandas/numpy/tenacity only — no ccxt/alpaca-py
+**Deploying with the whole repo connected to one Vercel project:** a
+repo-root `vercel.json` explicitly declares the two Python functions and
+the static page (`web/api/backtest.py`, `web/api/step.py`,
+`web/index.html`) via the classic `builds`/`routes` config, so Vercel
+doesn't need to auto-detect anything or scan the repo root for entrypoints
+-- this avoids Vercel picking up unrelated files (like
+`src/trading_agent/server.py`, meant for the Cloudflare deployment) as
+candidate entrypoints, which is what happened on real deploy attempts
+while building this before `vercel.json` existed. Project Settings → Root
+Directory should be left at its default (blank / repo root) for this to
+take effect -- if you'd previously set it to `web` while troubleshooting,
+change it back.
+
+Dependencies for the two functions come from `web/api/requirements.txt`
+and `web/requirements.txt` (pandas/numpy/tenacity only — no ccxt/alpaca-py
 needed for this deployment).
+
+**Verification status:** the `builds`/`routes` config format itself is a
+long-standing, well-documented Vercel pattern for custom source paths
+(confirmed via multiple community examples), but it could not be dry-run
+in this session -- `vercel build` requires the linked account's
+credentials, which weren't available here. If Vercel still doesn't pick
+up the functions correctly, check the project's Framework Preset is set to
+"Other" (a preset expecting a different structure can override
+`vercel.json`).
 
 ## Project layout
 
