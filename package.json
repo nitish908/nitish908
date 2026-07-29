@@ -1,16 +1,30 @@
 {
-  "name": "trading-agent-worker",
+  "name": "quickpdf",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
-    "@cloudflare/containers": "^0.0.19"
+    "jszip": "^3.10.1",
+    "next": "16.2.12",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.9.155",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-dropzone": "^19.1.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.0.0",
-    "typescript": "^5.5.0",
-    "wrangler": "^4.0.0"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.12",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
