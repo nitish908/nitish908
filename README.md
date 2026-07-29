@@ -49,6 +49,11 @@ margins using FIFO cost-basis accounting.
   implemented for crypto (Binance via `ccxt`, with testnet/sandbox support),
   stocks (Alpaca, with native paper trading), and a fully offline
   `SimulatedAdapter` used when no API keys are configured.
+- **Stateless deployment** (`src/trading_agent/server.py`): the same
+  poll-signal-risk-execute pipeline exposed as a single `POST /step` HTTP
+  call that takes/returns serialized Portfolio+RiskManager state, for
+  platforms that can't run a long-lived process (see [Deploying to
+  Cloudflare Containers](#deploying-to-cloudflare-containers)).
 
 ## Setup
 
@@ -139,14 +144,84 @@ agent prints a repeated warning banner before doing anything else.
 pytest -q
 ```
 
-53 tests cover indicator math, strategy signal generation, risk-manager
+60 tests cover indicator math, strategy signal generation, risk-manager
 position sizing/kill-switch logic, FIFO P&L/margin accounting, adapter
 translation (mocked — no real network calls), execution retry/logging, the
-agent loop, and a full end-to-end backtest.
+agent loop, and a full end-to-end backtest -- including a test that proves
+serializing Portfolio/RiskManager to JSON and rebuilding them from scratch
+between *every single poll* produces identical results to running
+continuously in memory (the guarantee the Cloudflare deployment below
+depends on).
+
+## Deploying to Cloudflare Containers
+
+The `run` command above is a long-lived process; Cloudflare's container
+platform is consumption-based and can sleep a container between requests.
+So instead of deploying `run` as-is, this repo ships a **stateless**
+variant: `src/trading_agent/server.py` exposes a single `POST /step` that
+does one poll (fetch → signal → risk → execute) and returns the *updated*
+Portfolio/RiskManager state as JSON. A small Cloudflare Worker + Durable
+Object (`cloudflare/worker/src/index.ts`) owns the polling schedule and
+persists that state in the Durable Object's own storage between calls —
+so open positions, cost-basis history, and the daily kill switch all
+survive the container going to sleep and waking back up.
+
+```
+Dockerfile                      # packages the app to run trading_agent.server
+wrangler.toml                   # container + Durable Object + Worker config
+cloudflare/worker/
+  src/index.ts                  # Container subclass: schedule()'s /step every N seconds
+  package.json / tsconfig.json
+```
+
+**⚠️ Verification status:** this was built and type-checked in a sandboxed
+session where Cloudflare's docs site returned 403s to automated fetches, and
+Docker Hub image pulls were blocked by the sandbox's own egress policy — so
+it could not be built into an image or deployed to a real Cloudflare account
+here. What *was* verified in this session:
+- The full pytest suite, including the state-serialization round-trip proof.
+- `src/trading_agent/server.py` running directly and answering `GET
+  /health` / `POST /step` correctly.
+- `cloudflare/worker/src/index.ts` type-checks cleanly against the real
+  `@cloudflare/containers` type declarations (`npx tsc --noEmit`).
+- `wrangler deploy --dry-run` parses `wrangler.toml` without errors (it
+  actually caught and helped fix a deprecated config field: `[[containers]]`
+  fields must be flattened at the top level, not nested under
+  `[containers.configuration]`, in the currently installed wrangler version).
+
+What was **not** verified (confirm yourself before trusting this with real
+funds): whether `this.schedule()` re-fires cleanly across container
+restarts without stacking duplicate polls, and whether secrets set via
+`wrangler secret put` actually reach the container the way `envVars` in
+`index.ts` assumes. Watch `wrangler tail` after deploying to check for
+doubled-up `/step` calls before pointing this at anything real.
+
+### Deploy steps
+
+```bash
+cd cloudflare/worker
+npm install
+
+npx wrangler login                       # one-time, opens a browser
+
+# Secrets (never commit these; leave unset to run on the offline SimulatedAdapter)
+npx wrangler secret put BINANCE_API_KEY --config ../../wrangler.toml
+npx wrangler secret put BINANCE_API_SECRET --config ../../wrangler.toml
+# ...and/or ALPACA_API_KEY / ALPACA_API_SECRET for stocks
+
+npx wrangler deploy --config ../../wrangler.toml
+```
+
+Start in paper mode (`config/config.yaml` already defaults to it) and watch
+`npx wrangler tail --config ../../wrangler.toml` for the first several polls
+before ever flipping to live mode.
 
 ## Project layout
 
 ```
+Dockerfile                      # container image for src/trading_agent/server.py
+wrangler.toml                   # Cloudflare Containers/Worker deployment config
+cloudflare/worker/               # Worker + Durable Object driving the container
 config/config.yaml            # default configuration
 data/fixtures/sample_ohlcv.csv  # synthetic OHLCV data for backtest/tests
 src/trading_agent/
@@ -157,7 +232,9 @@ src/trading_agent/
   adapters/       ExchangeAdapter interface + CCXT/Binance, Alpaca, Simulated
   execution/      OrderExecutor (retries) + TradeLogger (SQLite/CSV)
   backtest/       BacktestEngine + PerformanceReport
-  agent/          AgentLoop (poll -> signal -> risk -> execute -> log)
+  agent/          step.py (execute_step, shared) + loop.py (AgentLoop, continuous)
+  factory.py      shared adapter/risk-config construction (used by cli.py and server.py)
+  server.py       stateless POST /step HTTP wrapper, for container/serverless deployment
   cli.py          `run` and `backtest` commands
-tests/            pytest suite (53 tests, all offline)
+tests/            pytest suite (60 tests, all offline)
 ```

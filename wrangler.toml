@@ -1,0 +1,30 @@
+# Cloudflare deployment config. See README.md "Deploying to Cloudflare
+# Containers" for the full setup/deploy walkthrough and important caveats
+# about parts of this file that couldn't be verified against Cloudflare's
+# live docs (they returned 403s to automated fetches at the time this was
+# written) -- confirm against `wrangler docs` / the current containers
+# starter template before deploying with real trading credentials.
+
+name = "trading-agent"
+main = "cloudflare/worker/src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Non-secret defaults. Real API keys must NOT go here -- set them with
+# `wrangler secret put BINANCE_API_KEY` (etc.) instead; see README.
+[vars]
+TRADING_AGENT_MARKET = "crypto"
+
+[[containers]]
+class_name = "TradingAgentContainer"
+image = "./Dockerfile"
+max_instances = 1
+instance_type = "basic"
+
+[[durable_objects.bindings]]
+class_name = "TradingAgentContainer"
+name = "TRADING_AGENT_CONTAINER"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TradingAgentContainer"]

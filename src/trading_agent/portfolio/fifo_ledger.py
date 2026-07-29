@@ -9,7 +9,10 @@ one RealizedTrade per matched lot portion.
 from __future__ import annotations
 
 from collections import defaultdict, deque
+from datetime import datetime
 from decimal import Decimal
+
+from trading_agent.utils.decimal_utils import D
 
 from .models import Fill, Lot, RealizedTrade
 
@@ -20,6 +23,38 @@ class FIFOLedger:
 
     def open_lots(self, symbol: str) -> list[Lot]:
         return list(self._lots[symbol])
+
+    def to_dict(self) -> dict:
+        """JSON-safe snapshot of all open lots, for persisting across process
+        restarts (e.g. a Cloudflare Container going to sleep between polls)."""
+        return {
+            symbol: [
+                {
+                    "quantity": str(lot.quantity),
+                    "price_per_unit": str(lot.price_per_unit),
+                    "fee_per_unit": str(lot.fee_per_unit),
+                    "timestamp": lot.timestamp.isoformat(),
+                }
+                for lot in lots
+            ]
+            for symbol, lots in self._lots.items()
+            if lots
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "FIFOLedger":
+        ledger = cls()
+        for symbol, lots in data.items():
+            ledger._lots[symbol] = deque(
+                Lot(
+                    quantity=D(lot["quantity"]),
+                    price_per_unit=D(lot["price_per_unit"]),
+                    fee_per_unit=D(lot["fee_per_unit"]),
+                    timestamp=datetime.fromisoformat(lot["timestamp"]),
+                )
+                for lot in lots
+            )
+        return ledger
 
     def apply_fill(self, fill: Fill) -> list[RealizedTrade]:
         if fill.side == "BUY":

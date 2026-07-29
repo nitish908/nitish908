@@ -9,7 +9,7 @@ from decimal import Decimal
 from typing import Iterable
 
 from trading_agent.portfolio.models import Position
-from trading_agent.utils.decimal_utils import quantize_qty_down
+from trading_agent.utils.decimal_utils import D, quantize_qty_down
 
 from .models import RiskConfig, SizingDecision, TradeProposal
 
@@ -107,3 +107,20 @@ class RiskManager:
             risk_amount=risk_amount,
             reward_risk_ratio=reward_risk_ratio,
         )
+
+    def to_dict(self) -> dict:
+        """JSON-safe snapshot of the daily kill-switch state, for persisting
+        across process restarts (e.g. a Cloudflare Container that sleeps
+        between polls). RiskConfig itself is not included -- it comes from
+        static app config, not from mutable runtime state."""
+        return {
+            "day_start_equity": str(self.day_start_equity) if self.day_start_equity is not None else None,
+            "halted_for_day": self.halted_for_day,
+        }
+
+    def restore(self, data: dict) -> None:
+        """Restore kill-switch state onto an already-constructed RiskManager
+        (which needs its RiskConfig from static app config first)."""
+        day_start_equity = data.get("day_start_equity")
+        self.day_start_equity = D(day_start_equity) if day_start_equity is not None else None
+        self.halted_for_day = bool(data.get("halted_for_day", False))

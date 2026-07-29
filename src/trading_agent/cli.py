@@ -14,71 +14,21 @@ CLI flag -- a deliberate double guard against accidental real-money trading.
 from __future__ import annotations
 
 from decimal import Decimal
-from pathlib import Path
 
 import click
 
-from trading_agent.adapters import AlpacaAdapter, CCXTBinanceAdapter, SimulatedAdapter
 from trading_agent.agent import AgentLoop
 from trading_agent.backtest import BacktestEngine, load_ohlcv_csv
-from trading_agent.config import AppConfig, ConfigError, assert_live_trading_allowed, load_config
+from trading_agent.config import ConfigError, assert_live_trading_allowed, load_config
 from trading_agent.execution import OrderExecutor, TradeLogger
+from trading_agent.factory import DEFAULT_FIXTURE, DEFAULT_STARTING_CASH, build_adapter, risk_config_from_app_config
 from trading_agent.logging_config import configure_logging, get_logger, warn_live_trading
 from trading_agent.portfolio import Portfolio
-from trading_agent.risk import RiskConfig, RiskManager
+from trading_agent.risk import RiskManager
 from trading_agent.strategies import STRATEGIES, build_strategy
 from trading_agent.utils.decimal_utils import D
 
 logger = get_logger(__name__)
-
-DEFAULT_FIXTURE = Path(__file__).resolve().parent.parent.parent / "data" / "fixtures" / "sample_ohlcv.csv"
-DEFAULT_STARTING_CASH = Decimal("10000")
-
-
-def _risk_config_from_app_config(app_config: AppConfig) -> RiskConfig:
-    r = app_config.risk
-    return RiskConfig(
-        risk_pct_per_trade=D(r.risk_pct_per_trade),
-        min_risk_reward_ratio=D(r.min_risk_reward_ratio),
-        max_open_positions=r.max_open_positions,
-        max_exposure_pct_per_symbol=D(r.max_exposure_pct_per_symbol),
-        max_daily_drawdown_pct=D(r.max_daily_drawdown_pct),
-        default_stop_loss_pct=D(r.default_stop_loss_pct),
-    )
-
-
-def _build_adapter(app_config: AppConfig, market: str, mode: str, sim_data: str | None):
-    """Returns (adapter, using_simulated: bool)."""
-    if market == "crypto":
-        market_config = app_config.markets.crypto
-        has_keys = bool(app_config.binance_api_key and app_config.binance_api_secret)
-        if mode == "live":
-            if not has_keys:
-                raise ConfigError("Live crypto trading requires BINANCE_API_KEY/BINANCE_API_SECRET in .env")
-            return CCXTBinanceAdapter(app_config.binance_api_key, app_config.binance_api_secret, sandbox=False), False
-        if has_keys and market_config.sandbox:
-            return CCXTBinanceAdapter(app_config.binance_api_key, app_config.binance_api_secret, sandbox=True), False
-    else:
-        market_config = app_config.markets.stocks
-        has_keys = bool(app_config.alpaca_api_key and app_config.alpaca_api_secret)
-        if mode == "live":
-            if not has_keys:
-                raise ConfigError("Live stock trading requires ALPACA_API_KEY/ALPACA_API_SECRET in .env")
-            return AlpacaAdapter(app_config.alpaca_api_key, app_config.alpaca_api_secret, paper=False), False
-        if has_keys:
-            return AlpacaAdapter(app_config.alpaca_api_key, app_config.alpaca_api_secret, paper=True), False
-
-    # Paper mode, no real API keys configured: fall back to a zero-network
-    # simulated broker fed by historical data, so `run --mode paper` works
-    # out of the box with no exchange/broker account.
-    data_path = Path(sim_data) if sim_data else DEFAULT_FIXTURE
-    df = load_ohlcv_csv(data_path)
-    logger.warning(
-        "No API keys configured for %s -- using SimulatedAdapter fed by %s. "
-        "Add keys to .env to use a real sandbox/live adapter.",
-        market, data_path,
-    )
-    return SimulatedAdapter(df, starting_cash=DEFAULT_STARTING_CASH, fee_pct=D(app_config.fees.taker_fee_pct)), True
 
 
 @click.group()
@@ -102,7 +52,7 @@ def run(mode, config_path, market, live_confirm, sim_data):
 
     try:
         assert_live_trading_allowed(app_config, live_confirm)
-        adapter, using_simulated = _build_adapter(app_config, market, app_config.mode, sim_data)
+        adapter, using_simulated = build_adapter(app_config, market, app_config.mode, sim_data)
     except ConfigError as exc:
         raise click.ClickException(str(exc))
 
@@ -113,7 +63,7 @@ def run(mode, config_path, market, live_confirm, sim_data):
     symbol, timeframe = market_config.symbol, market_config.timeframe
 
     strategy = build_strategy(app_config.strategy.name, app_config.strategy.params)
-    risk_manager = RiskManager(_risk_config_from_app_config(app_config))
+    risk_manager = RiskManager(risk_config_from_app_config(app_config))
 
     starting_cash = DEFAULT_STARTING_CASH
     if not using_simulated:
@@ -150,7 +100,7 @@ def run(mode, config_path, market, live_confirm, sim_data):
 def backtest(data_path, strategy_name, config_path, symbol, starting_cash):
     app_config = load_config(config_path)
     strategy = build_strategy(strategy_name or app_config.strategy.name, app_config.strategy.params)
-    risk_manager = RiskManager(_risk_config_from_app_config(app_config))
+    risk_manager = RiskManager(risk_config_from_app_config(app_config))
     portfolio = Portfolio(starting_cash=Decimal(starting_cash))
     engine = BacktestEngine(strategy, risk_manager, portfolio, fee_pct=D(app_config.fees.taker_fee_pct))
 

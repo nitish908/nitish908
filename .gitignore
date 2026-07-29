@@ -11,3 +11,6 @@ logs/
 .pytest_cache/
 .coverage
 htmlcov/
+node_modules/
+.wrangler/
+*.tsbuildinfo

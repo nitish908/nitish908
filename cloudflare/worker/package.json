@@ -1,0 +1,16 @@
+{
+  "name": "trading-agent-worker",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --config ../../wrangler.toml",
+    "deploy": "wrangler deploy --config ../../wrangler.toml"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "^0.0.19"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.0.0",
+    "typescript": "^5.5.0",
+    "wrangler": "^4.0.0"
+  }
+}

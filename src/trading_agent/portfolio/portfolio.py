@@ -7,7 +7,10 @@ realized/unrealized P&L, and net profit margin.
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
+
+from trading_agent.utils.decimal_utils import D
 
 from .fifo_ledger import FIFOLedger
 from .models import Fill, Position, RealizedTrade
@@ -91,3 +94,50 @@ class Portfolio:
             return Decimal(0)
         wins = sum(1 for t in self.closed_trades_list if t.realized_pnl > 0)
         return Decimal(wins) / Decimal(len(self.closed_trades_list)) * Decimal(100)
+
+    def to_dict(self) -> dict:
+        """JSON-safe snapshot of the full portfolio state (cash, open lots,
+        closed-trade history, last marks), for persisting across process
+        restarts -- e.g. a Cloudflare Container that sleeps between polls."""
+        return {
+            "cash": str(self.cash),
+            "ledger": self.ledger.to_dict(),
+            "closed_trades": [
+                {
+                    "symbol": t.symbol,
+                    "quantity": str(t.quantity),
+                    "entry_price": str(t.entry_price),
+                    "exit_price": str(t.exit_price),
+                    "entry_fee_alloc": str(t.entry_fee_alloc),
+                    "exit_fee_alloc": str(t.exit_fee_alloc),
+                    "realized_pnl": str(t.realized_pnl),
+                    "net_profit_margin_pct": str(t.net_profit_margin_pct),
+                    "opened_at": t.opened_at.isoformat(),
+                    "closed_at": t.closed_at.isoformat(),
+                }
+                for t in self.closed_trades_list
+            ],
+            "last_marks": {symbol: str(price) for symbol, price in self._last_marks.items()},
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Portfolio":
+        portfolio = cls(starting_cash=D(data["cash"]))
+        portfolio.ledger = FIFOLedger.from_dict(data.get("ledger", {}))
+        portfolio.closed_trades_list = [
+            RealizedTrade(
+                symbol=t["symbol"],
+                quantity=D(t["quantity"]),
+                entry_price=D(t["entry_price"]),
+                exit_price=D(t["exit_price"]),
+                entry_fee_alloc=D(t["entry_fee_alloc"]),
+                exit_fee_alloc=D(t["exit_fee_alloc"]),
+                realized_pnl=D(t["realized_pnl"]),
+                net_profit_margin_pct=D(t["net_profit_margin_pct"]),
+                opened_at=datetime.fromisoformat(t["opened_at"]),
+                closed_at=datetime.fromisoformat(t["closed_at"]),
+            )
+            for t in data.get("closed_trades", [])
+        ]
+        portfolio._last_marks = {symbol: D(price) for symbol, price in data.get("last_marks", {}).items()}
+        return portfolio
