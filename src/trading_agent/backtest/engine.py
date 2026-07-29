@@ -23,7 +23,7 @@ from trading_agent.risk import RiskManager, TradeProposal
 from trading_agent.strategies import Signal, Strategy
 from trading_agent.utils.decimal_utils import D
 
-from .report import PerformanceReport
+from .report import EquityPoint, PerformanceReport
 
 
 class BacktestEngine:
@@ -48,6 +48,7 @@ class BacktestEngine:
 
         starting_equity = self.portfolio.equity
         equity_curve: list[Decimal] = []
+        equity_points: list[EquityPoint] = []
         peak_equity = starting_equity
         max_drawdown_pct = Decimal(0)
         current_day = None
@@ -73,6 +74,7 @@ class BacktestEngine:
             self.portfolio.mark_to_market({symbol: price})
             equity = self.portfolio.equity
             equity_curve.append(equity)
+            equity_points.append(EquityPoint(timestamp=bar_timestamp, equity=equity))
             peak_equity = max(peak_equity, equity)
             if peak_equity > 0:
                 drawdown = (peak_equity - equity) / peak_equity * Decimal(100)
@@ -95,6 +97,7 @@ class BacktestEngine:
             num_trades=len(self.portfolio.closed_trades()),
             net_profit_margin_pct=self.portfolio.aggregate_net_margin_pct(),
             trades=self.portfolio.closed_trades(),
+            equity_curve=equity_points,
         )
 
     def _handle_signal(self, signal, stop_loss, take_profit, symbol, price, timestamp) -> None:

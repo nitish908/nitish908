@@ -33,6 +33,13 @@ def test_backtest_end_to_end_on_fixture(sample_ohlcv_df):
     assert "Backtest Performance Report" in text
     assert "Net profit margin" in text
 
+    # equity curve should have one point per processed bar, ending at the
+    # reported ending equity, and monotonically non-decreasing timestamps
+    assert len(report.equity_curve) > 0
+    assert report.equity_curve[-1].equity == report.ending_equity
+    timestamps = [p.timestamp for p in report.equity_curve]
+    assert timestamps == sorted(timestamps)
+
 
 def test_backtest_raises_on_insufficient_data(sample_ohlcv_df):
     strategy = MACrossoverStrategy({"fast_period": 10, "slow_period": 50})

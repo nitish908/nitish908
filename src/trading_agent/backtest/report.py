@@ -1,10 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
 from trading_agent.portfolio.models import RealizedTrade
+
+
+@dataclass
+class EquityPoint:
+    timestamp: datetime
+    equity: Decimal
 
 
 @dataclass
@@ -18,6 +25,7 @@ class PerformanceReport:
     num_trades: int
     net_profit_margin_pct: Decimal
     trades: list[RealizedTrade] = field(default_factory=list)
+    equity_curve: list[EquityPoint] = field(default_factory=list)
 
     def render(self) -> str:
         lines = [
