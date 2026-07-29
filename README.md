@@ -231,6 +231,28 @@ Start in paper mode (`config/config.yaml` already defaults to it) and watch
 `npx wrangler tail` for the first several polls before ever flipping to live
 mode.
 
+## Deploying the dashboard to Vercel
+
+`web/` is a separate, self-contained deployable: a static dashboard
+(`index.html`) plus two Python serverless functions (`api/backtest.py`,
+`api/step.py`) that run backtests and step the paper agent interactively
+from a browser (state round-trips through the page, not a database — see
+the disclaimer in the dashboard itself). It bundles its own trimmed copy of
+`trading_agent` (`web/trading_agent/`, no ccxt/alpaca-py) and a copy of the
+fixture data (`web/data/sample_ohlcv.csv`) so it never needs to reach
+outside its own directory.
+
+**This matters because of how Vercel's project settings work:** if you
+connect this whole repo to a Vercel project, you *must* set that project's
+**Root Directory to `web`** (Project Settings → General → Root Directory).
+Without it, Vercel scans the repo root, doesn't find `api/*.py` in the
+default location it expects, and fails with "No python entrypoint found in
+default locations" (this happened on a real deploy attempt while building
+this). Once Root Directory is set to `web`, Vercel treats it as the project
+root, finds `index.html` and `api/*.py` where it expects them, and installs
+`web/requirements.txt` (pandas/numpy/tenacity only — no ccxt/alpaca-py
+needed for this deployment).
+
 ## Project layout
 
 ```
@@ -253,4 +275,5 @@ src/trading_agent/
   server.py       stateless POST /step HTTP wrapper, for container/serverless deployment
   cli.py          `run` and `backtest` commands
 tests/            pytest suite (60 tests, all offline)
+web/              self-contained Vercel dashboard (own trading_agent copy + fixture; see above)
 ```
