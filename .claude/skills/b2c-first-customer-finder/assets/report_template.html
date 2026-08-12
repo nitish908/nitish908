@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{BUSINESS_NAME}} — First Customer Signal Report</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --sub:#6b6b6b; --line:#e6e3dd; --bg:#fdfcf9;
+    --accent:#b5502e; --card:#ffffff; --good:#3d7a4f; --mid:#b98a1e; --low:#a3423a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.5;}
+  header{padding:48px 32px 24px;max-width:960px;margin:0 auto;}
+  h1{font-size:28px;margin:0 0 6px;}
+  .meta{color:var(--sub);font-size:14px;}
+  main{max-width:960px;margin:0 auto;padding:0 32px 64px;}
+  section{margin-top:36px;}
+  h2{font-size:18px;border-bottom:1px solid var(--line);padding-bottom:8px;}
+  .icp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;}
+  .icp-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;}
+  .icp-card h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);}
+  .prospect{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:20px 22px;margin-top:16px;}
+  .prospect-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  .handle{font-weight:600;font-size:16px;}
+  .source a{color:var(--accent);text-decoration:none;font-size:13px;}
+  .source a:hover{text-decoration:underline;}
+  blockquote{margin:12px 0;padding:10px 14px;border-left:3px solid var(--accent);
+    background:#faf6ef;font-style:italic;color:#3a3a3a;}
+  .scores{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .score{font-size:12px;padding:3px 9px;border-radius:999px;background:#f1efe9;color:var(--ink);}
+  .score.high{color:var(--good);} .score.mid{color:var(--mid);} .score.low{color:var(--low);}
+  .opener{margin-top:12px;padding:12px 14px;background:#fbf8f2;border-radius:8px;font-size:14px;}
+  .opener-label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);margin-bottom:4px;}
+  .dropped{opacity:.75;}
+  .dropped .prospect{border-style:dashed;}
+  footer{max-width:960px;margin:0 auto;padding:24px 32px 48px;color:var(--sub);font-size:12px;
+    border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>{{BUSINESS_NAME}} — First Customer Signal Report</h1>
+  <div class="meta">Generated {{DATE}} · {{TOTAL_SIGNALS}} public signals reviewed · {{OUTREACH_COUNT}} reachable</div>
+</header>
+
+<main>
+  <section>
+    <h2>The business</h2>
+    <p>{{BUSINESS_SUMMARY}}</p>
+  </section>
+
+  <section>
+    <h2>Consumer ICP</h2>
+    <div class="icp-grid">
+      <div class="icp-card"><h3>Trigger moments</h3><p>{{ICP_TRIGGERS}}</p></div>
+      <div class="icp-card"><h3>Where they show up</h3><p>{{ICP_CHANNELS}}</p></div>
+      <div class="icp-card"><h3>Language they use</h3><p>{{ICP_LANGUAGE}}</p></div>
+      <div class="icp-card"><h3>Who to skip</h3><p>{{ICP_EXCLUSIONS}}</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Reachable prospects</h2>
+    <!-- Repeat this block per prospect with reachability >= 2 -->
+    <div class="prospect">
+      <div class="prospect-head">
+        <span class="handle">{{HANDLE}}</span>
+        <span class="source"><a href="{{SOURCE_URL}}" target="_blank">source ↗</a></span>
+      </div>
+      <blockquote>"{{QUOTE}}"</blockquote>
+      <div class="scores">
+        <span class="score {{FIT_CLASS}}">Fit {{FIT_SCORE}}/5</span>
+        <span class="score {{TIMING_CLASS}}">Timing {{TIMING_SCORE}}/5</span>
+        <span class="score {{REACH_CLASS}}">Reachability {{REACH_SCORE}}/5</span>
+      </div>
+      <div class="opener">
+        <div class="opener-label">Suggested opener (public reply preferred)</div>
+        {{OPENER_TEXT}}
+      </div>
+    </div>
+    <!-- end repeat -->
+  </section>
+
+  <section class="dropped">
+    <h2>Demand signals (not outreach-ready)</h2>
+    <p style="color:var(--sub);font-size:13px;">Real signals worth knowing about, but reachability
+      was too low (closed DMs, no consented contact path, or too old) — logged for market
+      validation only, not outreach.</p>
+    <!-- Repeat per dropped signal -->
+    <div class="prospect">
+      <div class="prospect-head">
+        <span class="handle">{{HANDLE}}</span>
+        <span class="source"><a href="{{SOURCE_URL}}" target="_blank">source ↗</a></span>
+      </div>
+      <blockquote>"{{QUOTE}}"</blockquote>
+      <div class="scores"><span class="score">Why dropped: {{DROP_REASON}}</span></div>
+    </div>
+    <!-- end repeat -->
+  </section>
+</main>
+
+<footer>
+  Public signals only. No scraped contact data. One opener per person, no sequences.
+  See outreach-ethics reference before sending anything. Not legal advice on outreach compliance
+  in your jurisdiction.
+</footer>
+
+</body>
+</html>
