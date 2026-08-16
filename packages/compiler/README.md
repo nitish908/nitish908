@@ -1,9 +1,9 @@
 # @ulcs/compiler
 
 > **Provisional package name.** Part of the
-> [Open Context Specification (OCS)](https://github.com/Nitish1612/open-context-spec),
+> [Open Context Specification (OCS)](https://github.com/nitish908/open-context-spec),
 > drafted under the working name "Universal LLM Context Schema (ULCS)" — see
-> [ADR-0004](https://github.com/Nitish1612/open-context-spec/blob/main/specification/decisions/0004-ocs-branding-and-ulcs-migration.md).
+> [ADR-0004](https://github.com/nitish908/open-context-spec/blob/main/specification/decisions/0004-ocs-branding-and-ulcs-migration.md).
 > Not yet published to npm; name availability is unverified.
 
 Deterministic, token-budget-aware compilation of an OCS `ContextEnvelope`
@@ -41,7 +41,7 @@ for identical input, `asOf` clock, and token policy — see
 ## Documentation
 
 Full specification: see
-[`specification/v1/token-policy.md`](https://github.com/Nitish1612/open-context-spec/blob/main/specification/v1/token-policy.md)
+[`specification/v1/token-policy.md`](https://github.com/nitish908/open-context-spec/blob/main/specification/v1/token-policy.md)
 in the monorepo.
 
 ## License

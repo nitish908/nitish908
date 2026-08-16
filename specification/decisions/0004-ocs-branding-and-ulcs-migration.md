@@ -20,7 +20,7 @@ implementation:
 - Every occurrence of the string `"ULCS"` across the specification prose,
   README, and ~30 other documents.
 
-The repository has since moved to `Nitish1612/open-context-spec`, and the
+The repository has since moved to `nitish908/open-context-spec`, and the
 project is being introduced publicly under the name **Open Context
 Specification (OCS)**. The name and the identifiers now disagree, and that
 disagreement needs to be resolved deliberately rather than either (a) left

@@ -1,13 +1,13 @@
 # @ulcs/adapters
 
 > **Provisional package name.** Part of the
-> [Open Context Specification (OCS)](https://github.com/Nitish1612/open-context-spec),
+> [Open Context Specification (OCS)](https://github.com/nitish908/open-context-spec),
 > drafted under the working name "Universal LLM Context Schema (ULCS)" — see
-> [ADR-0004](https://github.com/Nitish1612/open-context-spec/blob/main/specification/decisions/0004-ocs-branding-and-ulcs-migration.md).
+> [ADR-0004](https://github.com/nitish908/open-context-spec/blob/main/specification/decisions/0004-ocs-branding-and-ulcs-migration.md).
 > Not yet published to npm; name availability is unverified.
 
 Renders a `CompiledContext` (from
-[`@ulcs/compiler`](https://github.com/Nitish1612/open-context-spec/tree/main/packages/compiler))
+[`@ulcs/compiler`](https://github.com/nitish908/open-context-spec/tree/main/packages/compiler))
 into six provider-neutral request shapes: `toOpenAIMessages`,
 `toAnthropicMessages`, `toGeminiContents`, `toGenericChatMessages`,
 `toMarkdownPrompt`, `toMCPResource`. Depends on none of the official
@@ -45,7 +45,7 @@ exactly what was collapsed or lost for that specific compilation — see
 ## Documentation
 
 Full specification: see
-[`specification/v1/interoperability.md`](https://github.com/Nitish1612/open-context-spec/blob/main/specification/v1/interoperability.md)
+[`specification/v1/interoperability.md`](https://github.com/nitish908/open-context-spec/blob/main/specification/v1/interoperability.md)
 in the monorepo.
 
 ## License

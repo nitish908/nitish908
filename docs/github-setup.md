@@ -1,7 +1,7 @@
 # GitHub repository setup (manual steps)
 
 This document is a checklist for whoever administers the
-`Nitish1612/open-context-spec` GitHub repository. None of these steps are
+`nitish908/open-context-spec` GitHub repository. None of these steps are
 performed automatically by CI, by any script in this repository, or by an
 AI assistant working in this codebase — they require repository-admin
 access to the GitHub UI (or the GitHub API with an authenticated,
@@ -114,7 +114,7 @@ branches (including contributors' own branches) are unaffected.
 
 Settings → Security → Code security and analysis → enable "Private
 vulnerability reporting". This is what makes the
-`https://github.com/Nitish1612/open-context-spec/security/advisories/new`
+`https://github.com/nitish908/open-context-spec/security/advisories/new`
 link in `.github/ISSUE_TEMPLATE/config.yml` and `SECURITY.md` actually
 work — without it, that link 404s or offers to file a public issue
 instead.

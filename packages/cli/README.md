@@ -1,9 +1,9 @@
 # @ulcs/cli
 
 > **Provisional package and binary name.** Part of the
-> [Open Context Specification (OCS)](https://github.com/Nitish1612/open-context-spec),
+> [Open Context Specification (OCS)](https://github.com/nitish908/open-context-spec),
 > drafted under the working name "Universal LLM Context Schema (ULCS)" — see
-> [ADR-0004](https://github.com/Nitish1612/open-context-spec/blob/main/specification/decisions/0004-ocs-branding-and-ulcs-migration.md).
+> [ADR-0004](https://github.com/nitish908/open-context-spec/blob/main/specification/decisions/0004-ocs-branding-and-ulcs-migration.md).
 > Not yet published to npm; name availability is unverified.
 
 The `ulcs` command-line tool: `validate`, `normalize`, `compile`, `redact`,
@@ -49,8 +49,8 @@ Run any command with `--json` where supported for machine-readable output.
 ## Documentation
 
 Full specification: see the root
-[README](https://github.com/Nitish1612/open-context-spec#readme) and
-[`specification/`](https://github.com/Nitish1612/open-context-spec/tree/main/specification)
+[README](https://github.com/nitish908/open-context-spec#readme) and
+[`specification/`](https://github.com/nitish908/open-context-spec/tree/main/specification)
 directory in the monorepo.
 
 ## License

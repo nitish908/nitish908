@@ -5,7 +5,7 @@
 For general questions, design discussion, or "how would I model X in OCS"
 questions that aren't yet a specific bug report or a concrete spec change
 proposal, use
-[GitHub Discussions](https://github.com/Nitish1612/open-context-spec/discussions)
+[GitHub Discussions](https://github.com/nitish908/open-context-spec/discussions)
 (once enabled — see `docs/github-setup.md` — until then, open an issue with
 the `discussion` label instead).
 

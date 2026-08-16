@@ -63,7 +63,7 @@ if their content is identical. Consequences of changing them casually:
 3. **Temporary GitHub-hosted distribution option (documented, not
    adopted):** once this repository is public, its schema files are
    incidentally fetchable via
-   `https://raw.githubusercontent.com/Nitish1612/open-context-spec/<ref>/schemas/v1/...`.
+   `https://raw.githubusercontent.com/nitish908/open-context-spec/<ref>/schemas/v1/...`.
    This is a _reference for interim manual fetching only_ — it is **not**
    adopted as the canonical `$id` namespace, because raw GitHub URLs are
    tied to a specific ref/branch (mutable unless pinned to a commit SHA,

@@ -1,9 +1,9 @@
 # @ulcs/validator
 
 > **Provisional package name.** This package implements schema validation
-> for the [Open Context Specification (OCS)](https://github.com/Nitish1612/open-context-spec),
+> for the [Open Context Specification (OCS)](https://github.com/nitish908/open-context-spec),
 > drafted under the working name "Universal LLM Context Schema (ULCS)" — see
-> [ADR-0004](https://github.com/Nitish1612/open-context-spec/blob/main/specification/decisions/0004-ocs-branding-and-ulcs-migration.md).
+> [ADR-0004](https://github.com/nitish908/open-context-spec/blob/main/specification/decisions/0004-ocs-branding-and-ulcs-migration.md).
 > Not yet published to npm; name availability is unverified.
 
 JSON Schema 2020-12 validation (via [Ajv](https://ajv.js.org/)) for OCS
@@ -11,7 +11,7 @@ JSON Schema 2020-12 validation (via [Ajv](https://ajv.js.org/)) for OCS
 JSON-Pointer error paths.
 
 Every schema document is bundled directly into this package (see
-[ADR-0006](https://github.com/Nitish1612/open-context-spec/blob/main/specification/decisions/0006-validator-schema-bundling.md))
+[ADR-0006](https://github.com/nitish908/open-context-spec/blob/main/specification/decisions/0006-validator-schema-bundling.md))
 — validation works fully offline, with no dependency on the monorepo it was
 built from and no network access.
 
@@ -61,8 +61,8 @@ return `{ valid: boolean; errors: ValidationError[] }`, where every
 ## Documentation
 
 Full specification: see the
-[`specification/`](https://github.com/Nitish1612/open-context-spec/tree/main/specification)
-and [`schemas/`](https://github.com/Nitish1612/open-context-spec/tree/main/schemas)
+[`specification/`](https://github.com/nitish908/open-context-spec/tree/main/specification)
+and [`schemas/`](https://github.com/nitish908/open-context-spec/tree/main/schemas)
 directories in the monorepo.
 
 ## License

@@ -1,6 +1,6 @@
 # Open Context Specification (OCS)
 
-[![CI](https://github.com/Nitish1612/open-context-spec/actions/workflows/ci.yml/badge.svg)](https://github.com/Nitish1612/open-context-spec/actions/workflows/ci.yml)
+[![CI](https://github.com/nitish908/open-context-spec/actions/workflows/ci.yml/badge.svg)](https://github.com/nitish908/open-context-spec/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](./LICENSE)
 ![Status: Experimental Draft](https://img.shields.io/badge/status-experimental%20draft-orange)
 ![Node.js >=18.18](https://img.shields.io/badge/node-%3E%3D18.18-brightgreen)
@@ -95,7 +95,7 @@ Concretely, OCS gives you things a template cannot:
 ## Quick start (5 minutes)
 
 ```bash
-git clone https://github.com/Nitish1612/open-context-spec.git ocs
+git clone https://github.com/nitish908/open-context-spec.git ocs
 cd ocs
 pnpm install
 pnpm run build
