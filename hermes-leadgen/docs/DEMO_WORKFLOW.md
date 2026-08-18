@@ -20,22 +20,29 @@ Go to **Lead discovery** → **CSV upload** → choose
 Go to **Leads** — all five now appear with `stage = discovered`, no score
 yet.
 
-## 2. Research a lead
+## 2. Score a lead (works without live research)
 
 Click into **Pixel & Pine Automation Agency** (the strongest-fit lead in
-the sample data — it mentions Slack, Telegram, and automation directly).
-Click **Research website**. Within a few seconds you'll see:
+the sample data — its CSV `description` mentions Slack, Telegram, and
+automation directly). The scoring engine reads the lead's existing fields
+(including that description), so you don't need to research it first —
+skip straight to step 3.
 
-- **Research findings**: a summary, and (if an AI provider is configured
-  via `OPENAI_BASE_URL`) a pain point / use case / suggested package —
-  each marked `(verified)` or `(assumption)`, with a citation link back to
-  the exact page used
-- **Pages fetched**: the specific URLs the research pipeline visited,
-  and whether `robots.txt` allowed each one
-
-Without an AI provider configured, you'll still get a rule-based summary
-and (if the page text matches known patterns) a pain point/use case — the
-MVP works end-to-end without any AI provider.
+> **Note on "Research website" and the sample data:** the five companies
+> in `leads_sample.csv` are fictional, and their `*.example.com` website
+> URLs are placeholders that don't resolve on the real internet (only the
+> bare `example.com` domain is a real, reserved IANA address — its
+> subdomains aren't). Clicking **Research website** on a sample lead will
+> correctly run the full safety pipeline (SSRF check passes, `robots.txt`
+> is checked) and then fail closed at the DNS-resolution step, producing
+> zero findings — this is correct behavior, not a bug: the pipeline never
+> fabricates findings for a page it couldn't actually fetch. To see
+> **live** research produce real findings and citations, try it on a lead
+> with a real website — either add one manually (**Lead discovery** →
+> **Manual entry**) or pull one in via **Lead sources** → add a GitHub
+> organization source for a real org (e.g. a company you know publishes
+> on GitHub) → **Run now**, then open that lead and click
+> **Research website**.
 
 ## 3. Score the lead
 
@@ -58,13 +65,16 @@ Go to **Approval queue**. Your draft is there with `status: pending`,
 showing:
 - The full subject + body, editable inline
 - The **cited company detail** the draft's opening line is built from —
-  cross-check it against what you saw in Research findings
+  cross-check it against the lead's description (or, on a lead you
+  researched live in step 2, the research finding it was drawn from)
 
 Edit the body if you want (click **Save edit**), then click **Approve**.
 
 ## 6. Confirm nothing gets sent automatically
 
-Click **Send now** on the now-approved draft. You'll get:
+Approving moves the draft out of the default **pending** view — switch
+the status filter dropdown at the top of the approval queue to
+**approved** to find it again. Click **Send now**. You'll get:
 
 > Live sending is disabled in this deployment (OUTREACH_LIVE_SEND_ENABLED=false).
 > Use the CSV export in the approval queue to send manually.
