@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/scoring", tags=["scoring"], dependencies=[Depend
 
 
 class ScoringRuleOut(BaseModel):
-    id: str
+    id: UUID
     key: str
     label: str
     description: str

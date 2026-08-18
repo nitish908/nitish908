@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --border: 214 32% 91%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --primary: 222 47% 11%;
+  --primary-foreground: 210 40% 98%;
+  --card: 0 0% 100%;
+  --destructive: 0 72% 51%;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.badge-hot { @apply bg-red-100 text-red-800 border border-red-200; }
+.badge-warm { @apply bg-amber-100 text-amber-800 border border-amber-200; }
+.badge-cold { @apply bg-slate-100 text-slate-600 border border-slate-200; }
