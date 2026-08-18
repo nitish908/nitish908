@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routers import auth, crm, leads, reports, research, scoring, settings, sources
+from app.api.routers import auth, crm, leads, outreach, reports, research, scoring, settings, sources
 from app.core.config import get_settings
 
 settings_obj = get_settings()
@@ -31,6 +31,7 @@ app.include_router(leads.router)
 app.include_router(scoring.router)
 app.include_router(sources.router)
 app.include_router(research.router)
+app.include_router(outreach.router)
 app.include_router(crm.router)
 app.include_router(reports.router)
 app.include_router(settings.router)
