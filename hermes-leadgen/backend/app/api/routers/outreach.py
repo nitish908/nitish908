@@ -20,7 +20,7 @@ from app.models.lead import Lead
 from app.models.outreach import ApprovalRecord, OutreachMessage
 from app.models.user import User
 from app.services.outreach.email_provider import get_email_provider
-from app.services.outreach.generator import generate_draft
+from app.services.outreach.queue import queue_draft
 
 router = APIRouter(prefix="/api/outreach", tags=["outreach"], dependencies=[Depends(verify_csrf)])
 
@@ -45,12 +45,7 @@ def create_draft(lead_id: UUID, payload: GenerateDraftRequest, db: Session = Dep
     if payload.message_type not in {m.value for m in MessageType}:
         raise HTTPException(status_code=400, detail="Unknown message_type")
 
-    message = generate_draft(db, lead, payload.message_type)
-    approval = ApprovalRecord(message_id=message.id, lead_id=lead.id, channel=message.channel, status=ApprovalStatus.PENDING.value)
-    db.add(approval)
-    if lead.stage in ("discovered", "researching", "qualified"):
-        lead.stage = "draft_ready"
-        db.add(lead)
+    message, approval = queue_draft(db, lead, payload.message_type)
 
     record_audit(db, actor_id=user.id, action="draft_created", object_type="outreach_message", object_id=str(message.id), detail=payload.message_type)
     db.commit()
