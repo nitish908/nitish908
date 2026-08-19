@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
+from app.core.config import get_settings
 from app.models.enums import ResearchConfidence
 from app.services.llm_client import chat_completion, is_configured
 
@@ -65,11 +66,17 @@ class AnalysisResult:
 def _wrap_untrusted(pages: list[tuple[str, str, str]]) -> str:
     """pages: list of (url, page_type, text). Wraps every page's text in
     explicit untrusted-data delimiters so the model (and any human reading
-    logs) can never confuse it with an instruction."""
+    logs) can never confuse it with an instruction.
+
+    Each page's text is capped to keep the prompt small: a company's
+    business facts are almost always evident in the first portion of a
+    page, and an unbounded prompt (multiple full pages) is slower and more
+    expensive for every provider, not just resource-constrained ones."""
+    max_chars = get_settings().research_llm_max_chars_per_page
     parts = []
     for url, page_type, text in pages:
         parts.append(
-            f"<untrusted_website_content source_url=\"{url}\" page_type=\"{page_type}\">\n{text}\n</untrusted_website_content>"
+            f"<untrusted_website_content source_url=\"{url}\" page_type=\"{page_type}\">\n{text[:max_chars]}\n</untrusted_website_content>"
         )
     return "\n\n".join(parts)
 
@@ -116,9 +123,17 @@ def analyze_pages(company_name: str, pages: list[tuple[str, str, str]]) -> Analy
     if not is_configured():
         return _rule_based_fallback(company_name, pages)
 
+    # Cap how many pages go to the LLM: a home page (put first, if present)
+    # plus a small number of others is enough for a good summary, and keeps
+    # the prompt fast and cheap for every provider.
+    max_pages = get_settings().research_llm_max_pages
+    home_pages = [p for p in pages if p[1] == "home"]
+    other_pages = [p for p in pages if p[1] != "home"]
+    llm_pages = (home_pages + other_pages)[:max_pages]
+
     user_content = (
         f"Company name (from our records, not from the website): {company_name}\n\n"
-        f"{_wrap_untrusted(pages)}"
+        f"{_wrap_untrusted(llm_pages)}"
     )
     raw = chat_completion(system_prompt=SYSTEM_PROMPT, user_content=user_content)
     if not raw:

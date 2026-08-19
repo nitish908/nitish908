@@ -39,7 +39,8 @@ class Settings(BaseSettings):
     # --- AI provider (OpenAI-compatible; works with Ollama) ---
     openai_base_url: str = Field(default="", alias="OPENAI_BASE_URL")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
-    openai_model: str = Field(default="llama3.1", alias="OPENAI_MODEL")
+    openai_model: str = Field(default="llama3.2:3b", alias="OPENAI_MODEL")
+    openai_timeout_seconds: int = Field(default=30, alias="OPENAI_TIMEOUT_SECONDS")
 
     # --- Outreach sending (kept disabled by default; MVP is draft + CSV export only) ---
     outreach_live_send_enabled: bool = Field(default=False, alias="OUTREACH_LIVE_SEND_ENABLED")
@@ -61,6 +62,8 @@ class Settings(BaseSettings):
     research_max_pages_per_domain: int = Field(default=5, alias="RESEARCH_MAX_PAGES_PER_DOMAIN")
     research_request_timeout_seconds: int = Field(default=10, alias="RESEARCH_REQUEST_TIMEOUT_SECONDS")
     research_requests_per_domain_per_minute: int = Field(default=6, alias="RESEARCH_REQUESTS_PER_DOMAIN_PER_MINUTE")
+    research_llm_max_chars_per_page: int = Field(default=1500, alias="RESEARCH_LLM_MAX_CHARS_PER_PAGE")
+    research_llm_max_pages: int = Field(default=2, alias="RESEARCH_LLM_MAX_PAGES")
 
     # --- Daily workflow defaults ---
     daily_discovery_lead_limit: int = Field(default=25, alias="DAILY_DISCOVERY_LEAD_LIMIT")

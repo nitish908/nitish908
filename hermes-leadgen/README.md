@@ -41,6 +41,33 @@ beat (the daily workflow, 07:00 UTC by default), and the Next.js frontend.
 Sign in with `SEED_OWNER_EMAIL` / `SEED_OWNER_PASSWORD` from your `.env`.
 To add more users later: `docker compose exec backend python scripts/create_user.py you@example.com 'a-strong-password' owner`.
 
+## AI provider for research (optional)
+
+The research pipeline works fully rule-based with no AI provider configured
+(deterministic pain-point/use-case inference from page content). For richer,
+per-company analysis, connect any OpenAI-compatible chat completions
+endpoint via `OPENAI_BASE_URL` / `OPENAI_API_KEY` / `OPENAI_MODEL` in `.env`.
+
+To use the bundled local Ollama service instead of a hosted API:
+
+```bash
+docker compose --profile llm up -d ollama ollama-init
+# ollama-init pulls the model (default llama3.2:3b) once, then exits —
+# check progress with: docker compose logs -f ollama-init
+```
+
+Then set in `.env` and restart backend + worker:
+
+```
+OPENAI_BASE_URL=http://ollama:11434/v1
+OPENAI_MODEL=llama3.2:3b
+```
+
+`OPENAI_API_KEY` can stay blank — Ollama doesn't check it. The research
+pipeline still fails closed to the rule-based fallback on any provider
+error, and fetched page content is always sent as inert delimited data,
+never able to trigger tool calls or override the system prompt.
+
 ## Demo workflow (CSV → approved draft)
 
 See [`docs/DEMO_WORKFLOW.md`](./docs/DEMO_WORKFLOW.md) for a step-by-step

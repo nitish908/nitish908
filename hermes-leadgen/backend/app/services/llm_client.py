@@ -36,7 +36,7 @@ def chat_completion(*, system_prompt: str, user_content: str, max_tokens: int = 
 
     url = settings.openai_base_url.rstrip("/") + "/chat/completions"
     try:
-        resp = requests.post(url, json=payload, headers=headers, timeout=30)
+        resp = requests.post(url, json=payload, headers=headers, timeout=settings.openai_timeout_seconds)
         resp.raise_for_status()
         data = resp.json()
         return data["choices"][0]["message"]["content"]
