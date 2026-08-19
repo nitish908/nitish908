@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     openai_base_url: str = Field(default="", alias="OPENAI_BASE_URL")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openai_model: str = Field(default="llama3.2:3b", alias="OPENAI_MODEL")
-    openai_timeout_seconds: int = Field(default=120, alias="OPENAI_TIMEOUT_SECONDS")
+    openai_timeout_seconds: int = Field(default=30, alias="OPENAI_TIMEOUT_SECONDS")
 
     # --- Outreach sending (kept disabled by default; MVP is draft + CSV export only) ---
     outreach_live_send_enabled: bool = Field(default=False, alias="OUTREACH_LIVE_SEND_ENABLED")
