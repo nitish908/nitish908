@@ -83,5 +83,28 @@ services:
       - /app/.next
     command: npm run dev
 
+  # Optional local AI provider for the research pipeline (see README "AI provider" section).
+  # Opt-in: only starts with `docker compose --profile llm up`. Not required for the MVP —
+  # research falls back to deterministic rule-based analysis when no provider is configured.
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    profiles: ["llm"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  # One-shot init job: pulls the model ollama-pull.sh names, then exits. Run once per
+  # fresh ollama_data volume; re-running is a fast no-op once the model is cached.
+  ollama-init:
+    image: ollama/ollama:latest
+    profiles: ["llm"]
+    depends_on:
+      - ollama
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["OLLAMA_HOST=ollama:11434 ollama pull ${OLLAMA_PULL_MODEL:-llama3.2:3b}"]
+
 volumes:
   postgres_data:
+  ollama_data:
