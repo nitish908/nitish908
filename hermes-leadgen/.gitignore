@@ -16,3 +16,9 @@ out/
 .env
 .env.*
 !.env.example
+
+# Local docker-compose overrides (e.g. environment-specific network/proxy workarounds)
+docker-compose.override.yml
+
+# Celery beat's runtime schedule database (recreated on every beat start)
+celerybeat-schedule
